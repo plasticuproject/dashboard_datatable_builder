@@ -71,4 +71,4 @@ After running the program, check the `events.csv` file for your aggregated data.
 
 ### Note
 
-The default retention period for the final filtering step is set to 15 days. This means after initial processing based on the `days_back` parameter, entries older than 7 days from the current date are further filtered out before the final write operation.
+The default retention period for the final filtering step is set to 15 days. This means after initial processing based on the `days_back` parameter, entries older than 15 days from the current date are further filtered out before the final write operation.
