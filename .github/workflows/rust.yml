@@ -1,0 +1,76 @@
+name: Lint Build Release
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run tests
+      run: cargo test --verbose
+
+    - name: Run Clippy
+      run: cargo clippy --all-targets --all-features -- -D warnings
+
+  build:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build the project
+      run: cargo build --release
+
+    - name: Package build
+      run: |
+        mkdir -p release
+        cp target/release/dashboard_datatable_builder release/
+        cd release
+        tar -czf dashboard_datatable_builder-${{ github.sha }}-${{ github.ref_name }}.tar.gz dashboard_datatable_builder
+
+    - name: List Release Directory
+      run: ls -la release/
+
+    - name: Upload Release Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: dashboard_datatable_builder-${{ github.sha }}-${{ github.ref_name }}
+        path: release/dashboard_datatable_builder-${{ github.sha }}-${{ github.ref_name }}.tar.gz
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: dashboard_datatable_builder-${{ github.sha }}-${{ github.ref_name }}
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: dashboard_datatable_builder-${{ github.sha }}-${{ github.ref_name }}.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
