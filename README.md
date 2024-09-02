@@ -19,7 +19,7 @@ The `dashboard_datatable_builder` is a Rust-based tool designed to process large
 
 ### Prerequisites
 
-- Rust 1.8.0 or later
+- Rust 1.80 or later
 - Cargo for managing Rust packages
 
 ### Installation
